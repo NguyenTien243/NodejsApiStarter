@@ -1,4 +1,9 @@
 const express = require('express')
+
+// import passport để ... 
+const passport = require('passport')
+const passportConfig = require('../middlewares/passport')
+
 // const router = express.Router()
 const router = require('express-promise-router')()
 
@@ -9,6 +14,10 @@ const { validateBody, validateParam, schemas } = require('../helpers/routerHelpe
 router.route('/')
     .get(UserController.index)
     .post(validateBody(schemas.userSchema), UserController.newUser)
+
+    router.route('/signup').post(validateBody(schemas.authSignUpSchema), UserController.signUp)
+    router.route('/signin').post(validateBody(schemas.authSignInSchema),passport.authenticate('local',{session:false}),UserController.signIn)
+    router.route('/secret').get(passport.authenticate('jwt', { session: false }), UserController.secret) // router để unlock token
 
 router.route('/:userID')
     .get(validateParam(schemas.idSchema, 'userID'), UserController.getUser)

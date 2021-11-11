@@ -1,3 +1,6 @@
+// cấu hình env
+require('dotenv').config()
+const passport = require('passport')
 const bodyParser = require('body-parser')
 const express = require('express')
 const logger = require('morgan')
@@ -5,6 +8,7 @@ const mongoClient = require('mongoose')
 
 // setup connect mongodb by mongoose
 mongoClient.connect('mongodb://localhost/nodejsapistarter', {
+        useCreateIndex: true,
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
@@ -12,7 +16,7 @@ mongoClient.connect('mongodb://localhost/nodejsapistarter', {
     .catch((error) => console.error(`❌ Connect database is failed with error which is ${error}`))
 
 const app = express()
-
+app.use(passport.initialize());
 const deckRoute = require('./routes/deck')
 const userRoute = require('./routes/user')
 

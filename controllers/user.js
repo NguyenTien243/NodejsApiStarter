@@ -4,6 +4,19 @@
  * [v] Promises
  * [v] Async/await (Promises)
  */
+// import jwt from
+var jwt = require('jsonwebtoken');
+const {JWT_SECRET} = require('../configs')
+const encodedToken = function (userId) {
+    console.log('mã bí mật là: ',JWT_SECRET)
+    console.log('User ID: ',userId)
+    return jwt.sign({
+        iss: 'tien dep trai',
+        sub: userId,
+        iat: new Date().getTime(),
+        exp: new Date().setDate( new Date().getDate()+3)
+    },JWT_SECRET)
+}
 
  const Deck = require('../models/Deck')
  const User = require('../models/User')
@@ -84,7 +97,33 @@ const updateUser = async (req, res, next) => {
 
     return res.status(200).json({success: true})
 }
+const secret = async (req, res, next) => {
+    console.log('gọi đến secret2')
+    res.status(200).json({resources: true})
+}
+const signIn = async (req, res, next) => {
+    console.log('gọi đến signIn')
+    console.log(req.user) // bắt từ hàm done(null,user) file passport.js
+    const token = encodedToken(req.user._id)
 
+    res.setHeader('Authorization',token)
+    return res.status(200).json({access : true})
+}
+
+const signUp = async (req, res, next) => {
+    console.log('gọi đến signUp')
+
+    const {firstName, lastName,email, password} = req.value.body
+    const foundUser = await User.findOne({ email})
+    if(foundUser) return res.status(403).json({error:{message: 'Email đã có người dùng'}})
+    const newUser = new User({firstName, lastName,email, password})
+    console.log('user là ', newUser)
+    newUser.save()
+    const token = encodedToken(newUser._id)
+    res.setHeader('Authorization-Tien', token) // bỏ token vào header
+
+    return res.status(201).json({success: true})
+}
 module.exports = {
     getUser,
     getUserDecks,
@@ -92,5 +131,8 @@ module.exports = {
     newUser,
     newUserDeck,
     replaceUser,
-    updateUser
+    updateUser,
+    secret,
+    signIn,
+    signUp
 }
